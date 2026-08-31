@@ -1,0 +1,2223 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>퐝's Planner</title>
+<meta name="theme-color" content="#1b4b7a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="퐝's Planner">
+<meta name="description" content="퐝's Planner - 오프라인 여행 일정 플래너">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='38' fill='%231b4b7a'/%3E%3Ccircle cx='90' cy='78' r='30' fill='none' stroke='%23e0a94e' stroke-width='9'/%3E%3Cpath d='M90 108 L90 146' stroke='%23e0a94e' stroke-width='9' stroke-linecap='round'/%3E%3Ccircle cx='90' cy='78' r='11' fill='%23d9724a'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b4b7a'/%3E%3Ccircle cx='32' cy='27' r='11' fill='none' stroke='%23e0a94e' stroke-width='4'/%3E%3Cpath d='M32 38 L32 52' stroke='%23e0a94e' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+/* ===== Leaflet 1.9.4 CSS (인라인) ===== */
+/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	background-image: url(images/layers.png);
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: url(images/layers-2x.png);
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	background-image: url(images/marker-icon.png);
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+/* Leaflet 커스텀 오버라이드 */
+.leaflet-container{background:#dfe6ec;font-family:inherit}
+.leaflet-bar a{width:30px;height:30px;line-height:30px;color:#1c2733;border-bottom-color:#e5e9ee;font:700 18px/30px system-ui,sans-serif}
+.leaflet-bar{box-shadow:0 2px 8px rgba(14,28,42,.22);border-radius:9px}
+.leaflet-bar a:first-child{border-radius:9px 9px 0 0}
+.leaflet-bar a:last-child{border-radius:0 0 9px 9px}
+.leaflet-control-attribution{background:rgba(255,255,255,.82);font:10px/1.6 system-ui,sans-serif;color:#6b7a89;padding:0 6px}
+.leaflet-div-icon{background:transparent;border:none}
+
+/* ============ 앱 스타일 ============ */
+:root{
+  --navy:#1b4b7a; --navy2:#3f7cb0; --orange:#d9724a; --gold:#e0a94e;
+  --bg:#f6f8fa; --card:#fff; --line:#e5e9ee; --tx:#1c2733; --sub:#6b7a89;
+  --r:14px; --sh:0 2px 10px rgba(27,75,122,.07);
+  --abh:calc(54px + env(safe-area-inset-top));
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--tx);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  font-size:14px;line-height:1.45;
+  padding-bottom:calc(78px + env(safe-area-inset-bottom));
+  overflow-x:hidden;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{border:none;background:none;cursor:pointer;transition:transform .09s ease}
+button:active{transform:scale(.94)}
+.hide{display:none!important}
+/* 앱바 */
+.appbar{position:sticky;top:0;z-index:900;height:var(--abh);padding-top:env(safe-area-inset-top);
+  background:rgba(255,255,255,.96);backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px;padding-left:10px;padding-right:10px}
+.logo{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+.logo-mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--navy),var(--navy2));
+  color:#fff;font-weight:800;font-size:13px;display:grid;place-items:center}
+.logo-txt{font-weight:800;font-size:13px;letter-spacing:-.2px;color:var(--navy)}
+.ab-btn{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--navy2);border:1px solid var(--line);
+  border-radius:9px;padding:5px 7px;background:#fff}
+.trip-pick{flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;gap:3px;
+  font-size:12px;font-weight:800;color:var(--tx);background:#eef3f8;border-radius:10px;padding:6px 8px;
+  white-space:nowrap;overflow:hidden}
+.trip-pick span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ab-plus{flex:0 0 auto;width:30px;height:30px;border-radius:10px;background:var(--navy);color:#fff;font-size:19px;
+  font-weight:600;display:grid;place-items:center;line-height:1}
+/* 헤더 */
+.hero{position:relative;min-height:186px;display:flex;align-items:flex-end;
+  background-size:cover;background-position:center;
+  background-image:linear-gradient(135deg,#1b4b7a 0%,#3f7cb0 55%,#6ea3cc 100%)}
+.hero-ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,30,50,.14) 0%,rgba(10,30,50,.62) 100%)}
+.hero-in{position:relative;padding:18px 16px 16px;width:100%;color:#fff}
+.hero-label{font-size:11px;font-weight:800;letter-spacing:1.4px;opacity:.9;text-transform:uppercase}
+.hero-title{font-size:25px;font-weight:800;letter-spacing:-.6px;margin-top:3px;text-shadow:0 2px 10px rgba(0,0,0,.3)}
+.hero-sub{font-size:12.5px;opacity:.94;margin-top:5px}
+.dday{display:inline-block;margin-top:10px;background:var(--gold);color:#3a2a06;font-weight:800;font-size:11.5px;
+  padding:5px 11px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.22)}
+.dday.now{background:var(--orange);color:#fff}
+.dday.end{background:rgba(255,255,255,.28);color:#fff}
+.cam{position:absolute;top:calc(12px);right:12px;width:34px;height:34px;border-radius:12px;
+  background:rgba(255,255,255,.22);backdrop-filter:blur(6px);color:#fff;font-size:15px;display:grid;place-items:center;z-index:2}
+/* 페이지 탭 */
+.ptabs{display:flex;gap:6px;padding:10px 12px 8px;background:var(--bg)}
+.ptab{flex:1;padding:9px 0;border-radius:11px;font-size:13px;font-weight:800;color:var(--sub);background:#eaeef3}
+.ptab.on{background:var(--navy);color:#fff;box-shadow:0 3px 10px rgba(27,75,122,.25)}
+/* 날짜 탭 */
+.dtabs{position:sticky;top:var(--abh);z-index:800;display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;
+  padding:8px 12px 9px;background:rgba(246,248,250,.97);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);scrollbar-width:none}
+.dtabs::-webkit-scrollbar{display:none}
+.dchip{flex:0 0 auto;min-width:60px;padding:7px 10px;border-radius:12px;background:#fff;border:1px solid var(--line);
+  text-align:center;line-height:1.25}
+.dchip b{display:block;font-size:13px;font-weight:800}
+.dchip i{display:block;font-size:10px;font-style:normal;color:var(--sub);font-weight:700}
+.dchip u{display:block;font-size:9.5px;text-decoration:none;color:var(--navy2);font-weight:700;margin-top:1px;
+  max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dchip.on{background:var(--navy);border-color:var(--navy);box-shadow:0 4px 12px rgba(27,75,122,.28)}
+.dchip.on b,.dchip.on i,.dchip.on u{color:#fff}
+/* 공통 카드 */
+.page{padding:12px 12px 6px}
+.sec{margin-bottom:14px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin:0 2px 8px}
+.sec-t{font-size:12.5px;font-weight:800;color:var(--sub);letter-spacing:.2px}
+.sec-a{font-size:11.5px;font-weight:800;color:var(--navy2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+/* 항공편 */
+.fl{padding:13px 14px;margin-bottom:8px;position:relative}
+.fl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.fl-air{font-size:11px;font-weight:800;color:var(--navy2)}
+.fl-date{font-size:11px;color:var(--sub);font-weight:700}
+.fl-body{display:flex;align-items:center;gap:6px}
+.fl-side{flex:1;min-width:0;text-align:center}
+.fl-code{font-size:21px;font-weight:800;letter-spacing:-.5px;color:var(--navy)}
+.fl-city{font-size:11px;color:var(--sub);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fl-time{font-size:13px;font-weight:800;margin-top:3px}
+.fl-mid{flex:0 0 auto;width:74px;text-align:center;color:var(--navy2)}
+.fl-line{height:1px;background:repeating-linear-gradient(90deg,var(--line) 0 5px,transparent 5px 9px);margin:5px 0}
+.fl-edit{font-size:11px;font-weight:800;color:var(--navy2);padding:5px 9px;background:#eef3f8;border-radius:9px;flex:0 0 auto}
+.fl-top>div{display:flex;align-items:center;gap:7px;min-width:0}
+.addbtn{width:100%;padding:11px;border-radius:12px;border:1.5px dashed #cfd8e2;color:var(--navy2);
+  font-weight:800;font-size:12.5px;background:#fff}
+/* 서류함 */
+.doc{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--line)}
+.doc:last-child{border-bottom:none}
+.doc-ic{width:34px;height:34px;border-radius:10px;background:#eef3f8;display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+.doc-tx{flex:1;min-width:0}
+.doc-n{font-size:12.5px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-s{font-size:11px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-go{color:#c3ccd6;font-size:15px}
+.empty{padding:22px 12px;text-align:center;color:var(--sub);font-size:12.5px}
+/* 일정 카드 */
+.it{padding:13px;margin-bottom:9px;transition:box-shadow .3s,transform .3s}
+.it.hl{box-shadow:0 0 0 3px var(--gold),0 6px 18px rgba(224,169,78,.3)}
+.it-top{display:flex;gap:11px}
+.it-ic{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:19px;flex:0 0 auto}
+.it-main{flex:1;min-width:0}
+.it-l1{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.it-time{font-size:12.5px;font-weight:800;color:var(--navy2);font-variant-numeric:tabular-nums}
+.it-name{font-size:15px;font-weight:800;letter-spacing:-.3px;flex:1;min-width:0;word-break:break-all}
+.it-l2{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:5px}
+.bdg{font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:#eef3f8;color:var(--navy2)}
+.bdg.alarm{background:#fdf0e2;color:#a2681f}
+.bdg.move{background:#eaf5ef;color:#2f7d5c}
+.it-place{font-size:11.5px;color:var(--sub);margin-top:5px;word-break:break-all}
+.it-memo{font-size:12px;color:var(--sub);margin-top:7px;background:#f7f9fb;border-radius:10px;padding:8px 10px;
+  white-space:pre-wrap;word-break:break-word}
+.it-btns{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.mini{font-size:11px;font-weight:800;padding:6px 9px;border-radius:9px;background:#f2f5f8;color:var(--navy)}
+.mini.warn{background:#fdeeea;color:#b8462a}
+.mini.gold{background:#fbf2e2;color:#8f6413}
+/* 오버뷰 */
+#map{height:52vh;min-height:290px;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:var(--sh)}
+.pin{position:relative;width:0;height:0}
+.pin-b{position:absolute;left:-15px;top:-15px;width:30px;height:30px;border-radius:50%;color:#fff;
+  font-weight:800;font-size:13px;display:grid;place-items:center;border:2.5px solid #fff;
+  box-shadow:0 3px 9px rgba(0,0,0,.32)}
+.pin-l{position:absolute;left:18px;top:-11px;background:#fff;border:1px solid var(--line);border-radius:9px;
+  padding:3px 7px;font-size:10.5px;font-weight:800;white-space:nowrap;box-shadow:0 2px 7px rgba(20,40,60,.16);
+  max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.pin-l small{color:var(--navy2);font-weight:800}
+.pin.lft .pin-l{left:auto;right:18px}
+.pin.done .pin-b{opacity:.62}
+.pin.done .pin-l{opacity:.72}
+.chr{position:relative;width:0;height:0;z-index:20}
+.chr-in{position:absolute;left:-19px;top:-30px;width:38px;height:38px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.32))}
+.ovp{margin-top:11px}
+.ovp-in{padding:13px}
+.ovp-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ovp-t{font-size:11.5px;font-weight:800;color:var(--sub)}
+.ovp-n{font-size:11.5px;font-weight:800;color:var(--navy2)}
+.bar{height:7px;border-radius:99px;background:#eaeef3;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--navy),var(--navy2));
+  transition:width .4s ease}
+.ovp-cur{display:flex;gap:10px;align-items:center;margin-top:11px}
+.ovp-cur .it-ic{width:36px;height:36px;font-size:17px;border-radius:12px}
+.ovp-cn{font-size:14px;font-weight:800;letter-spacing:-.3px}
+.ovp-cs{font-size:11.5px;color:var(--sub);margin-top:2px}
+.ovp-btns{display:flex;gap:6px;margin-top:12px}
+.ovp-btns button{flex:1;padding:10px 0;border-radius:11px;font-size:12.5px;font-weight:800;background:#f2f5f8;color:var(--navy)}
+.ovp-btns button.now{background:var(--orange);color:#fff}
+.legend{display:flex;gap:12px;margin-top:10px;font-size:10.5px;color:var(--sub);font-weight:700}
+.legend i{display:inline-block;width:16px;height:0;border-top:3px solid var(--navy);vertical-align:middle;margin-right:4px;border-radius:2px}
+.legend i.dash{border-top:3px dotted #aab6c2}
+/* 하단 바 */
+.botbar{position:fixed;left:0;right:0;bottom:0;z-index:850;display:flex;gap:8px;
+  padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+.botbar .pri{flex:1;padding:13px 0;border-radius:13px;background:var(--navy);color:#fff;font-weight:800;font-size:14px;
+  box-shadow:0 4px 14px rgba(27,75,122,.28)}
+.botbar .sec2{flex:0 0 76px;padding:13px 0;border-radius:13px;background:#eef1f5;color:var(--navy);font-weight:800;font-size:13px}
+/* 시트 */
+.mask{position:fixed;inset:0;background:rgba(14,28,42,.46);z-index:950;opacity:0;pointer-events:none;transition:opacity .24s}
+.mask.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:960;background:#fff;border-radius:20px 20px 0 0;
+  max-height:90vh;display:flex;flex-direction:column;transform:translateY(102%);transition:transform .3s cubic-bezier(.22,.85,.3,1);
+  box-shadow:0 -8px 30px rgba(14,28,42,.2)}
+.sheet.on{transform:translateY(0)}
+.sh-grab{width:38px;height:4px;border-radius:99px;background:#dbe2e9;margin:9px auto 4px;flex:0 0 auto}
+.sh-h{display:flex;align-items:center;justify-content:space-between;padding:6px 16px 10px;flex:0 0 auto}
+.sh-t{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.sh-x{font-size:13px;font-weight:800;color:var(--sub);padding:6px 8px}
+.sh-b{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 16px 16px}
+.sh-f{flex:0 0 auto;display:flex;gap:7px;padding:11px 16px calc(14px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);background:#fff}
+.sh-f button{flex:1;padding:13px 0;border-radius:12px;font-weight:800;font-size:14px}
+.sh-f .ok{background:var(--navy);color:#fff}
+.sh-f .del{flex:0 0 68px;background:#fdeeea;color:#b8462a;font-size:13px}
+.sh-f .no{flex:0 0 68px;background:#eef1f5;color:var(--sub);font-size:13px}
+.fld{margin-bottom:12px}
+.fld>label{display:block;font-size:11.5px;font-weight:800;color:var(--sub);margin-bottom:5px}
+.fld input,.fld select,.fld textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;
+  background:#fafbfc;font-size:14px;outline:none;-webkit-appearance:none;appearance:none}
+.fld select{background:#fafbfc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7a89' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center}
+.fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--navy2);background:#fff}
+.fld textarea{min-height:74px;resize:vertical}
+.row2{display:flex;gap:9px}
+.row2>*{flex:1;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:8px 11px;border-radius:11px;background:#f2f5f8;font-size:12.5px;font-weight:800;color:var(--sub);
+  border:1.5px solid transparent}
+.chip.on{background:#fff;border-color:var(--navy);color:var(--navy);box-shadow:0 2px 8px rgba(27,75,122,.15)}
+.filebox{border:1.5px dashed #cfd8e2;border-radius:12px;padding:12px;text-align:center;background:#fafbfc}
+.filebox label{font-size:12.5px;font-weight:800;color:var(--navy2)}
+.flist{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.frow{display:flex;align-items:center;gap:8px;background:#f2f5f8;border-radius:10px;padding:8px 10px}
+.frow span{flex:1;min-width:0;font-size:11.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow button{font-size:11px;font-weight:800;color:#b8462a}
+/* 여행 목록 */
+.trow{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:13px;margin-bottom:8px;background:#fff}
+.trow.on{border-color:var(--navy);background:#f4f8fc}
+.trow-m{flex:1;min-width:0}
+.trow-t{font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow-s{font-size:11px;color:var(--sub);margin-top:2px}
+.trow-c{color:var(--navy);font-weight:800;font-size:14px}
+/* 설정 */
+.srow{display:flex;align-items:center;gap:10px;padding:13px 2px;border-bottom:1px solid var(--line)}
+.srow:last-child{border-bottom:none}
+.srow-i{width:34px;height:34px;border-radius:11px;background:#eef3f8;display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+.srow-m{flex:1;min-width:0}
+.srow-t{font-size:13.5px;font-weight:800}
+.srow-s{font-size:11px;color:var(--sub);margin-top:1px}
+.srow-b{font-size:11.5px;font-weight:800;color:var(--navy2);padding:7px 10px;background:#eef3f8;border-radius:10px}
+.srow-b.danger{color:#b8462a;background:#fdeeea}
+/* 사용법 */
+.hcard{background:#f7f9fb;border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:9px}
+.hcard b{display:block;font-size:13.5px;margin-bottom:4px}
+.hcard p{margin:0;font-size:12px;color:var(--sub);line-height:1.55}
+.hstep{display:flex;gap:10px;margin-bottom:11px}
+.hstep i{flex:0 0 24px;height:24px;border-radius:8px;background:var(--navy);color:#fff;font-style:normal;
+  font-size:11.5px;font-weight:800;display:grid;place-items:center}
+.hstep div{flex:1;font-size:12.5px;line-height:1.5}
+/* 토스트 / 알람 */
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,14px);
+  background:rgba(24,40,56,.94);color:#fff;font-size:12.5px;font-weight:700;padding:11px 16px;border-radius:12px;
+  z-index:990;opacity:0;pointer-events:none;transition:all .25s;max-width:86vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.alarm{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 8px);z-index:995;
+  background:#fff;border-radius:15px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(14,28,42,.25);
+  padding:13px;display:flex;gap:11px;align-items:center;transform:translateY(-140%);transition:transform .35s cubic-bezier(.22,.85,.3,1)}
+.alarm.on{transform:translateY(0)}
+.alarm-i{width:38px;height:38px;border-radius:12px;background:#fdf0e2;display:grid;place-items:center;font-size:19px;flex:0 0 auto}
+.alarm-m{flex:1;min-width:0}
+.alarm-t{font-size:11px;font-weight:800;color:var(--orange)}
+.alarm-n{font-size:14px;font-weight:800;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alarm-s{font-size:11px;color:var(--sub)}
+.alarm-x{font-size:12px;font-weight:800;color:var(--sub);padding:8px}
+.note{font-size:11px;color:var(--sub);background:#f7f9fb;border-radius:10px;padding:9px 11px;line-height:1.5;margin-top:8px}
+</style>
+</head>
+<body>
+<!-- 앱바 -->
+<div class="appbar">
+  <div class="logo"><span class="logo-mark">퐝</span><span class="logo-txt">Planner</span></div>
+  <button class="ab-btn" id="btnHelp">사용법</button>
+  <button class="trip-pick" id="btnTrips"><span id="abTrip">여행</span>▾</button>
+  <button class="ab-plus" id="btnNewTrip">+</button>
+</div>
+
+<!-- 헤더 -->
+<header class="hero" id="hero">
+  <div class="hero-ov"></div>
+  <button class="cam" id="btnCam" title="배경 사진 변경">📷</button>
+  <div class="hero-in">
+    <div class="hero-label" id="heroLabel"></div>
+    <div class="hero-title" id="heroTitle"></div>
+    <div class="hero-sub" id="heroSub"></div>
+    <div class="dday" id="heroDday"></div>
+  </div>
+</header>
+
+<!-- 페이지 탭 -->
+<div class="ptabs">
+  <button class="ptab on" data-page="plan">일정</button>
+  <button class="ptab" data-page="over">오버뷰</button>
+</div>
+
+<!-- 날짜 탭 -->
+<div class="dtabs" id="dtabs"></div>
+
+<!-- 일정 페이지 -->
+<main class="page" id="pagePlan">
+  <section class="sec">
+    <div class="sec-h"><div class="sec-t">✈️ 항공편</div></div>
+    <div id="flightWrap"></div>
+    <button class="addbtn" id="btnAddFlight">+ 항공편 추가</button>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="sec-t">📂 예약 서류함</div><div class="sec-a" id="docCount"></div></div>
+    <div class="card" id="docWrap"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="sec-t" id="planDayLabel">오늘의 일정</div><div class="sec-a" id="planCount"></div></div>
+    <div id="planList"></div>
+  </section>
+</main>
+
+<!-- 오버뷰 페이지 -->
+<main class="page hide" id="pageOver">
+  <div id="map"></div>
+  <div class="card ovp"><div class="ovp-in">
+    <div class="ovp-h"><div class="ovp-t">오늘의 여정</div><div class="ovp-n" id="ovNum">0/0</div></div>
+    <div class="bar"><i id="ovBar" style="width:0%"></i></div>
+    <div class="ovp-cur">
+      <div class="it-ic" id="ovIc" style="background:#eef3f8">📍</div>
+      <div style="flex:1;min-width:0">
+        <div class="ovp-cn" id="ovName">일정이 없어요</div>
+        <div class="ovp-cs" id="ovSub">일정을 추가해 보세요</div>
+      </div>
+    </div>
+    <div class="ovp-btns">
+      <button id="ovPrev">◀ 이전</button>
+      <button class="now" id="ovNow">지금</button>
+      <button id="ovNext">다음 ▶</button>
+    </div>
+    <div class="legend"><span><i></i>지나온 길</span><span><i class="dash"></i>남은 길</span></div>
+  </div></div>
+</main>
+
+<!-- 하단 고정 바 -->
+<div class="botbar">
+  <button class="pri" id="btnAddItem">+ 일정 추가</button>
+  <button class="sec2" id="btnSettings">설정</button>
+</div>
+
+<!-- 마스크 -->
+<div class="mask" id="mask"></div>
+
+<!-- 시트: 일정 추가/편집 -->
+<div class="sheet" id="shItem">
+  <div class="sh-grab"></div>
+  <div class="sh-h"><div class="sh-t" id="shItemTitle">일정 추가</div><button class="sh-x" data-close>닫기</button></div>
+  <div class="sh-b">
+    <div class="fld"><label>카테고리</label><div class="chips" id="catChips"></div></div>
+    <div class="row2">
+      <div class="fld"><label>날짜</label><input type="date" id="fDay"></div>
+      <div class="fld"><label>시간</label><input type="time" id="fTime"></div>
+    </div>
+    <div class="fld"><label>일정 이름</label><input type="text" id="fName" placeholder="예: 센소지 절 구경"></div>
+    <div class="fld"><label>지도 검색어 / 주소</label><input type="text" id="fPlace" placeholder="예: Senso-ji Temple, Tokyo"></div>
+    <div class="fld"><label>구글맵 링크 (선택)</label><input type="url" id="fMap" placeholder="https://maps.app.goo.gl/..."></div>
+    <div class="fld"><label>이동 방법</label><div class="chips" id="moveChips"></div></div>
+    <div class="row2">
+      <div class="fld"><label>알람 시간 (선택)</label><input type="time" id="fAlarm"></div>
+      <div class="fld"><label>좌표 (자동)</label><input type="text" id="fGeo" placeholder="저장 시 자동 검색" readonly></div>
+    </div>
+    <div class="fld"><label>첨부파일 (PDF · 사진)</label>
+      <div class="filebox">
+        <input type="file" id="fFile" accept="image/*,application/pdf" multiple style="display:none">
+        <label for="fFile">📎 파일 선택하기</label>
+      </div>
+      <div class="flist" id="fFileList"></div>
+    </div>
+    <div class="fld"><label>메모</label><textarea id="fMemo" placeholder="예약번호, 팁 등을 적어두세요"></textarea></div>
+  </div>
+  <div class="sh-f">
+    <button class="del hide" id="itemDel">삭제</button>
+    <button class="no" data-close>취소</button>
+    <button class="ok" id="itemSave">저장</button>
+  </div>
+</div>
+
+<!-- 시트: 항공편 -->
+<div class="sheet" id="shFlight">
+  <div class="sh-grab"></div>
+  <div class="sh-h"><div class="sh-t" id="shFlightTitle">항공편 추가</div><button class="sh-x" data-close>닫기</button></div>
+  <div class="sh-b">
+    <div class="row2">
+      <div class="fld"><label>항공사 / 편명</label><input type="text" id="qAir" placeholder="예: KE703"></div>
+      <div class="fld"><label>날짜</label><input type="date" id="qDate"></div>
+    </div>
+    <div class="fld"><label>출발</label>
+      <div class="row2">
+        <input type="text" id="qC1" placeholder="ICN" maxlength="4">
+        <input type="text" id="qN1" placeholder="서울">
+        <input type="time" id="qT1">
+      </div>
+    </div>
+    <div class="fld"><label>도착</label>
+      <div class="row2">
+        <input type="text" id="qC2" placeholder="HND" maxlength="4">
+        <input type="text" id="qN2" placeholder="도쿄">
+        <input type="time" id="qT2">
+      </div>
+    </div>
+  </div>
+  <div class="sh-f">
+    <button class="del hide" id="flDel">삭제</button>
+    <button class="no" data-close>취소</button>
+    <button class="ok" id="flSave">저장</button>
+  </div>
+</div>
+
+<!-- 시트: 여행 만들기/편집 -->
+<div class="sheet" id="shTrip">
+  <div class="sh-grab"></div>
+  <div class="sh-h"><div class="sh-t" id="shTripTitle">새 여행 만들기</div><button class="sh-x" data-close>닫기</button></div>
+  <div class="sh-b">
+    <div class="fld"><label>여행 제목</label><input type="text" id="tTitle" placeholder="예: 도쿄 가족여행"></div>
+    <div class="row2">
+      <div class="fld"><label>시작일</label><input type="date" id="tStart"></div>
+      <div class="fld"><label>종료일</label><input type="date" id="tEnd"></div>
+    </div>
+    <div class="fld"><label>부제</label><input type="text" id="tNote" placeholder="예: 2인"></div>
+    <div class="fld"><label>도시 (쉼표로 구분, 날짜순)</label><input type="text" id="tCities" placeholder="예: 도쿄, 하코네"></div>
+    <div class="note">도시는 날짜 탭에 순서대로 표시돼요.</div>
+  </div>
+  <div class="sh-f">
+    <button class="del hide" id="tripDel">삭제</button>
+    <button class="no" data-close>취소</button>
+    <button class="ok" id="tripSave">저장</button>
+  </div>
+</div>
+
+<!-- 시트: 내 여행 목록 -->
+<div class="sheet" id="shTrips">
+  <div class="sh-grab"></div>
+  <div class="sh-h"><div class="sh-t">내 여행 목록</div><button class="sh-x" data-close>닫기</button></div>
+  <div class="sh-b" id="tripsWrap"></div>
+  <div class="sh-f"><button class="ok" id="tripsNew">+ 새 여행 만들기</button></div>
+</div>
+
+<!-- 시트: 첨부파일 -->
+<div class="sheet" id="shDocs">
+  <div class="sh-grab"></div>
+  <div class="sh-h"><div class="sh-t">첨부파일</div><button class="sh-x" data-close>닫기</button></div>
+  <div class="sh-b" id="docsWrap"></div>
+  <div class="sh-f"><button class="no" style="flex:1" data-close>닫기</button></div>
+</div>
+
+<!-- 시트: 설정 -->
+<div class="sheet" id="shSet">
+  <div class="sh-grab"></div>
+  <div class="sh-h"><div class="sh-t">설정</div><button class="sh-x" data-close>닫기</button></div>
+  <div class="sh-b">
+    <div class="fld"><label>여행 제목</label><input type="text" id="sTitle"></div>
+    <div class="srow"><div class="srow-i">🖼️</div><div class="srow-m"><div class="srow-t">배경 사진</div><div class="srow-s">헤더 이미지를 바꿔요</div></div><button class="srow-b" id="sBg">변경</button></div>
+    <div class="srow"><div class="srow-i">🔔</div><div class="srow-m"><div class="srow-t">알림 권한</div><div class="srow-s" id="sPermTx">브라우저 알림 허용</div></div><button class="srow-b" id="sPerm">요청</button></div>
+    <div class="srow"><div class="srow-i">📤</div><div class="srow-m"><div class="srow-t">JSON 내보내기</div><div class="srow-s">모든 여행을 백업해요</div></div><button class="srow-b" id="sExp">내보내기</button></div>
+    <div class="srow"><div class="srow-i">📥</div><div class="srow-m"><div class="srow-t">JSON 불러오기</div><div class="srow-s">백업 파일로 복원해요</div></div><button class="srow-b" id="sImp">불러오기</button></div>
+    <div class="srow"><div class="srow-i">📅</div><div class="srow-m"><div class="srow-t">전체 일정 캘린더</div><div class="srow-s">.ics 파일로 내보내요</div></div><button class="srow-b" id="sIcs">내보내기</button></div>
+    <div class="srow"><div class="srow-i">🗑️</div><div class="srow-m"><div class="srow-t">전체 초기화</div><div class="srow-s">모든 데이터를 지워요</div></div><button class="srow-b danger" id="sReset">초기화</button></div>
+    <div class="note">🔔 알람은 이 앱이 열려 있을 때만 동작해요. 홈 화면에 추가하면 앱처럼 쓸 수 있어요.</div>
+    <input type="file" id="sImpFile" accept="application/json,.json" style="display:none">
+  </div>
+  <div class="sh-f"><button class="no" data-close>취소</button><button class="ok" id="setSave">저장</button></div>
+</div>
+
+<!-- 시트: 사용법 -->
+<div class="sheet" id="shHelp">
+  <div class="sh-grab"></div>
+  <div class="sh-h"><div class="sh-t">퐝's Planner 사용법</div><button class="sh-x" data-close>닫기</button></div>
+  <div class="sh-b">
+    <div class="hcard"><b>🧳 여러 여행을 한 곳에</b><p>상단의 여행 이름을 누르면 여행 목록이 열려요. + 버튼으로 새 여행을 만들고 자유롭게 전환하세요. 모든 데이터는 이 기기에만 저장돼요.</p></div>
+    <div class="hcard"><b>🗺️ 오버뷰 지도</b><p>그날의 일정을 실제 지도 위에 번호 핀으로 보여줘요. 캐릭터가 도로를 따라 이동하며 동선을 보여주고, 핀을 누르면 해당 일정 카드로 이동해요.</p></div>
+    <div class="hcard"><b>📂 예약 서류함</b><p>일정에 첨부한 PDF·사진이 자동으로 모여요. 항공권, 호텔 바우처를 넣어두면 공항에서 바로 꺼내 볼 수 있어요.</p></div>
+    <div class="hcard"><b>🔔 알람 · 캘린더</b><p>일정마다 알람 시간을 넣으면 앱이 열려 있을 때 알려줘요. 캘린더 버튼으로 .ics를 내려받아 기본 캘린더 앱에 넣을 수도 있어요.</p></div>
+    <div style="height:6px"></div>
+    <div class="hstep"><i>1</i><div><b>여행 만들기</b> — 오른쪽 위 + 버튼으로 제목·기간·도시를 입력해요.</div></div>
+    <div class="hstep"><i>2</i><div><b>일정 담기</b> — 하단 [+ 일정 추가]에서 카테고리·시간·장소를 넣으면 좌표를 자동으로 찾아 지도에 올려요.</div></div>
+    <div class="hstep"><i>3</i><div><b>날짜별로 보기</b> — 날짜 탭을 누르면 그날 일정으로 이동해요.</div></div>
+    <div class="hstep"><i>4</i><div><b>동선 확인</b> — [오버뷰] 탭에서 [지금]을 누르면 현재 시각 기준 위치를 보여줘요.</div></div>
+    <div class="hstep"><i>5</i><div><b>백업</b> — 설정에서 JSON으로 내보내 두면 다른 기기에서도 불러올 수 있어요.</div></div>
+    <div class="note">브라우저 저장소(localStorage)를 사용해요. 시크릿 모드나 저장소 삭제 시 데이터가 사라질 수 있으니 가끔 JSON으로 백업해 주세요.</div>
+  </div>
+  <div class="sh-f"><button class="ok" data-close>확인</button></div>
+</div>
+
+<!-- 알람 팝업 / 토스트 -->
+<div class="alarm" id="alarmBox">
+  <div class="alarm-i">🔔</div>
+  <div class="alarm-m"><div class="alarm-t">일정 알람</div><div class="alarm-n" id="alarmName"></div><div class="alarm-s" id="alarmSub"></div></div>
+  <button class="alarm-x" id="alarmX">닫기</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<input type="file" id="bgFile" accept="image/*" style="display:none">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+/* ===================== 퐝's Planner ===================== */
+(function(){
+"use strict";
+
+/* ---------- 기본 유틸 ---------- */
+var $  = function(s,r){return (r||document).querySelector(s);};
+var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+var uid = function(){return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);};
+var esc = function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+
+var toastT=null;
+function toast(msg){
+  var el=$('#toast'); if(!el) return;
+  el.textContent=msg; el.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(function(){el.classList.remove('on');},1900);
+}
+
+/* ---------- 날짜 ---------- */
+var WD=['일','월','화','수','목','금','토'];
+function pad(n){return (n<10?'0':'')+n;}
+function fmtD(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function parseD(s){
+  if(!s) return null;
+  var p=String(s).split('-'); if(p.length<3) return null;
+  var d=new Date(+p[0],+p[1]-1,+p[2]); return isNaN(d.getTime())?null:d;
+}
+function today(){var n=new Date(); return new Date(n.getFullYear(),n.getMonth(),n.getDate());}
+function addDays(d,n){var x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x;}
+function diffDays(a,b){return Math.round((b.getTime()-a.getTime())/86400000);}
+function korDate(s){var d=parseD(s); if(!d) return ''; return (d.getMonth()+1)+'월 '+d.getDate()+'일 ('+WD[d.getDay()]+')';}
+function shortDate(s){var d=parseD(s); if(!d) return ''; return (d.getMonth()+1)+'.'+d.getDate()+' ('+WD[d.getDay()]+')';}
+function nowMin(){var n=new Date(); return n.getHours()*60+n.getMinutes();}
+function t2m(t){if(!t) return 0; var p=String(t).split(':'); return (+p[0]||0)*60+(+p[1]||0);}
+
+/* ---------- 카테고리 / 이동수단 ---------- */
+var CATS={
+  '항공':{e:'✈️',c:'#3f7cb0'}, '숙소':{e:'🏨',c:'#1b4b7a'},
+  '식당':{e:'🍽️',c:'#d9724a'}, '카페':{e:'☕',c:'#a9743f'},
+  '명소':{e:'⛩️',c:'#2f8f6f'}, '이동':{e:'🚇',c:'#6b7a89'},
+  '쇼핑':{e:'🛍️',c:'#c0508a'}, '기타':{e:'📌',c:'#e0a94e'}
+};
+var CATK=Object.keys(CATS);
+var MOVES={'도보':'🚶','지하철':'🚇','버스':'🚌','트램':'🚊','기차':'🚆','택시':'🚕','항공':'✈️','자전거':'🚲'};
+var MOVEK=Object.keys(MOVES);
+function cat(c){return CATS[c]||CATS['기타'];}
+
+/* ---------- 저장소 ---------- */
+var KEY='hwang_planner_v1';
+var mem=null, lsOK=true;
+function lsGet(){
+  try{ var v=localStorage.getItem(KEY); return v?JSON.parse(v):null; }
+  catch(e){ lsOK=false; return mem; }
+}
+function lsSet(o){
+  mem=o;
+  try{ localStorage.setItem(KEY,JSON.stringify(o)); return true; }
+  catch(e){ lsOK=false; return false; }
+}
+var DB={trips:[],activeId:null};
+function save(silent){
+  var ok=lsSet(DB);
+  if(!ok && !silent) toast('⚠️ 저장 공간이 부족해요. 첨부파일을 줄여보세요');
+  return ok;
+}
+
+/* ---------- 예시 데이터 ---------- */
+function seed(){
+  var s=addDays(today(),30), e=addDays(s,2);
+  var d1=fmtD(s), d2=fmtD(addDays(s,1)), d3=fmtD(e);
+  return {
+    id:uid(), title:'도쿄 3일 미식여행', start:d1, end:d3, note:'2인',
+    cities:['도쿄'], bg:'',
+    flights:[
+      {id:uid(),air:'KE703',date:d1,c1:'ICN',n1:'서울',t1:'09:20',c2:'HND',n2:'도쿄',t2:'11:45'},
+      {id:uid(),air:'KE706',date:d3,c1:'HND',n1:'도쿄',t1:'17:05',c2:'ICN',n2:'서울',t2:'19:45'}
+    ],
+    items:[
+      {id:uid(),day:d1,time:'14:00',cat:'숙소',name:'시부야 스트림 호텔 체크인',place:'Shibuya Stream Excel Hotel Tokyu',mapUrl:'',memo:'예약번호 SH-20481 / 얼리 체크인 요청함',move:'지하철',alarm:'13:30',lat:35.6580,lng:139.7016,userDocs:[]},
+      {id:uid(),day:d1,time:'18:30',cat:'식당',name:'이치란 라멘 시부야점',place:'Ichiran Shibuya',mapUrl:'',memo:'대기 있을 수 있음. 1층 자판기에서 식권 구매',move:'도보',alarm:'',lat:35.6598,lng:139.7006,userDocs:[]},
+      {id:uid(),day:d2,time:'10:00',cat:'명소',name:'센소지 · 나카미세 거리',place:'Senso-ji Temple Tokyo',mapUrl:'',memo:'아침 일찍 가면 사람이 적어요',move:'지하철',alarm:'09:20',lat:35.7148,lng:139.7967,userDocs:[]},
+      {id:uid(),day:d2,time:'13:30',cat:'카페',name:'블루보틀 기요스미시라카와',place:'Blue Bottle Coffee Kiyosumi Shirakawa',mapUrl:'',memo:'로스터리 1호점',move:'도보',alarm:'',lat:35.6810,lng:139.7998,userDocs:[]},
+      {id:uid(),day:d2,time:'16:30',cat:'쇼핑',name:'긴자 식스',place:'GINZA SIX',mapUrl:'',memo:'6층 츠타야 서점 / 옥상정원',move:'지하철',alarm:'',lat:35.6699,lng:139.7648,userDocs:[]},
+      {id:uid(),day:d3,time:'11:00',cat:'명소',name:'도쿄역 마루노우치 역사',place:'Tokyo Station Marunouchi',mapUrl:'',memo:'기념품은 다이마루 지하에서',move:'도보',alarm:'',lat:35.6812,lng:139.7671,userDocs:[]}
+    ]
+  };
+}
+
+/* ---------- 상태 ---------- */
+var curDay=null, page='plan', editItemId=null, editFlightId=null, editTripId=null;
+var formCat='명소', formMove='도보', formDocs=[];
+var delArm={};
+
+function trip(){
+  var t=null;
+  for(var i=0;i<DB.trips.length;i++) if(DB.trips[i].id===DB.activeId) t=DB.trips[i];
+  if(!t) t=DB.trips[0]||null;
+  return t;
+}
+function days(t){
+  t=t||trip(); if(!t) return [];
+  var s=parseD(t.start), e=parseD(t.end);
+  if(!s||!e||e<s) return s?[fmtD(s)]:[];
+  var n=Math.min(diffDays(s,e),365), out=[];
+  for(var i=0;i<=n;i++) out.push(fmtD(addDays(s,i)));
+  return out;
+}
+function cityOf(t,idx){
+  var c=(t&&t.cities)||[]; if(!c.length) return '';
+  var n=days(t).length||1;
+  return c[Math.min(c.length-1,Math.floor(idx*c.length/n))]||'';
+}
+function itemsOf(day,t){
+  t=t||trip(); if(!t) return [];
+  return (t.items||[]).filter(function(i){return i.day===day;})
+    .sort(function(a,b){return t2m(a.time)-t2m(b.time);});
+}
+
+/* ---------- 헤더 ---------- */
+function renderHeader(){
+  var t=trip();
+  if(!t){ $('#heroTitle').textContent='여행을 추가해 주세요'; $('#heroSub').textContent='';
+          $('#heroLabel').textContent=''; $('#heroDday').textContent=''; $('#abTrip').textContent='여행 없음'; return; }
+  $('#abTrip').textContent=t.title||'제목 없음';
+  $('#heroTitle').textContent=t.title||'제목 없음';
+  var s=parseD(t.start), e=parseD(t.end);
+  var yr=s?s.getFullYear():new Date().getFullYear();
+  var cs=(t.cities||[]).filter(Boolean);
+  $('#heroLabel').textContent=(cs.length? cs.join(' · ')+' · ':'')+yr;
+  var sub='';
+  if(s&&e){
+    var n=Math.max(0,diffDays(s,e));
+    sub=korDate(t.start)+' – '+korDate(t.end)+' · '+(n>0?(n+'박 '+(n+1)+'일'):'당일');
+  }
+  if(t.note) sub+= (sub?' · ':'')+t.note;
+  $('#heroSub').textContent=sub;
+  var dd=$('#heroDday'); dd.className='dday';
+  if(s&&e){
+    var k=diffDays(today(),s), k2=diffDays(today(),e);
+    if(k>0) dd.textContent='D-'+k;
+    else if(k===0){ dd.textContent='D-DAY'; dd.classList.add('now'); }
+    else if(k2>=0){ dd.textContent='여행 '+(1-k)+'일차'; dd.classList.add('now'); }
+    else { dd.textContent='여행 종료'; dd.classList.add('end'); }
+  } else dd.textContent='';
+  $('#hero').style.backgroundImage = t.bg
+    ? 'url('+t.bg+')'
+    : 'linear-gradient(135deg,#1b4b7a 0%,#3f7cb0 55%,#6ea3cc 100%)';
+}
+
+/* ---------- 날짜 탭 ---------- */
+function renderDays(){
+  var t=trip(), wrap=$('#dtabs'); wrap.innerHTML='';
+  var ds=days(t);
+  if(!ds.length){ wrap.innerHTML='<div style="font-size:12px;color:#6b7a89;padding:4px">여행 기간을 설정해 주세요</div>'; return; }
+  if(ds.indexOf(curDay)<0) curDay=ds[0];
+  ds.forEach(function(day,i){
+    var d=parseD(day);
+    var b=document.createElement('button');
+    b.className='dchip'+(day===curDay?' on':'');
+    var city=cityOf(t,i);
+    b.innerHTML='<i>'+WD[d.getDay()]+'</i><b>'+(d.getMonth()+1)+'.'+d.getDate()+'</b>'+(city?'<u>'+esc(city)+'</u>':'');
+    b.onclick=function(){ selectDay(day,true); };
+    wrap.appendChild(b);
+  });
+  var on=wrap.querySelector('.dchip.on');
+  if(on) on.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+}
+function selectDay(day,scroll){
+  curDay=day; renderDays(); renderPlan();
+  if(page==='over') renderOverview();
+  if(scroll && page==='plan'){
+    setTimeout(function(){
+      var first=$('#planList .it');
+      var top=(first?first:$('#planList')).getBoundingClientRect().top+window.scrollY
+              -(document.querySelector('.dtabs').getBoundingClientRect().height
+              +document.querySelector('.appbar').getBoundingClientRect().height+10);
+      window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+    },60);
+  }
+}
+
+/* ---------- 항공편 ---------- */
+function renderFlights(){
+  var t=trip(), w=$('#flightWrap'); w.innerHTML='';
+  var fl=(t&&t.flights)||[];
+  if(!fl.length){
+    w.innerHTML='<div class="card" style="padding:16px;text-align:center;color:#6b7a89;font-size:12.5px;margin-bottom:8px">등록된 항공편이 없어요</div>';
+    return;
+  }
+  fl.forEach(function(f){
+    var d=document.createElement('div'); d.className='card fl';
+    d.innerHTML=
+      '<div class="fl-top"><div><span class="fl-air">'+esc(f.air||'항공편')+'</span>'+
+      '<span class="fl-date">'+esc(shortDate(f.date))+'</span></div>'+
+      '<button class="fl-edit">편집</button></div>'+
+      '<div class="fl-body">'+
+        '<div class="fl-side"><div class="fl-code">'+esc(f.c1||'---')+'</div>'+
+          '<div class="fl-city">'+esc(f.n1||'')+'</div><div class="fl-time">'+esc(f.t1||'--:--')+'</div></div>'+
+        '<div class="fl-mid"><div class="fl-line"></div><div style="font-size:17px">✈️</div><div class="fl-line"></div></div>'+
+        '<div class="fl-side"><div class="fl-code">'+esc(f.c2||'---')+'</div>'+
+          '<div class="fl-city">'+esc(f.n2||'')+'</div><div class="fl-time">'+esc(f.t2||'--:--')+'</div></div>'+
+      '</div>';
+    d.querySelector('.fl-edit').onclick=function(){ openFlight(f.id); };
+    w.appendChild(d);
+  });
+}
+
+/* ---------- 서류함 ---------- */
+function allDocs(){
+  var t=trip(), out=[];
+  if(!t) return out;
+  (t.items||[]).slice().sort(function(a,b){
+    return a.day===b.day ? t2m(a.time)-t2m(b.time) : (a.day<b.day?-1:1);
+  }).forEach(function(it){
+    (it.userDocs||[]).forEach(function(f,i){ out.push({f:f,it:it,i:i}); });
+  });
+  return out;
+}
+function openDataUrl(dataUrl,name){
+  try{
+    var parts=String(dataUrl).split(','), meta=parts[0]||'', b64=parts[1]||'';
+    var mime=(meta.match(/data:([^;]+)/)||[,'application/octet-stream'])[1];
+    var bin=atob(b64), arr=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+    var url=URL.createObjectURL(new Blob([arr],{type:mime}));
+    var w=window.open(url,'_blank');
+    if(!w){ var a=document.createElement('a'); a.href=url; a.download=name||'file'; a.click(); }
+    setTimeout(function(){URL.revokeObjectURL(url);},60000);
+  }catch(e){ toast('파일을 열 수 없어요'); }
+}
+function renderDocs(){
+  var w=$('#docWrap'), list=allDocs();
+  $('#docCount').textContent=list.length?(list.length+'개'):'';
+  if(!list.length){ w.innerHTML='<div class="empty">첨부한 예약 서류가 없어요<br>일정 편집에서 PDF·사진을 넣어보세요</div>'; return; }
+  w.innerHTML='';
+  list.forEach(function(o){
+    var isPdf=/pdf/i.test(o.f.data.slice(0,30))||/\.pdf$/i.test(o.f.name||'');
+    var r=document.createElement('div'); r.className='doc';
+    r.innerHTML='<div class="doc-ic">'+(isPdf?'📄':'🖼️')+'</div>'+
+      '<div class="doc-tx"><div class="doc-n">'+esc(o.f.name||'파일')+'</div>'+
+      '<div class="doc-s">'+esc(korDate(o.it.day))+' · '+esc(o.it.name||'')+'</div></div>'+
+      '<div class="doc-go">›</div>';
+    r.onclick=function(){ openDataUrl(o.f.data,o.f.name); };
+    w.appendChild(r);
+  });
+}
+
+/* ---------- 일정 목록 ---------- */
+function mapSearchUrl(it){
+  if(it.mapUrl) return it.mapUrl;
+  var q=encodeURIComponent(it.place||it.name||'');
+  return 'https://www.google.com/maps/search/?api=1&query='+q;
+}
+function mapDirUrl(it){
+  if(it.mapUrl) return it.mapUrl;
+  var q=encodeURIComponent(it.place||it.name||'');
+  return 'https://www.google.com/maps/dir/?api=1&destination='+q;
+}
+function renderPlan(){
+  var t=trip(), w=$('#planList'); w.innerHTML='';
+  renderFlights(); renderDocs();
+  var list=itemsOf(curDay,t);
+  $('#planDayLabel').textContent = curDay ? korDate(curDay)+' 일정' : '일정';
+  $('#planCount').textContent = list.length?(list.length+'개'):'';
+  if(!list.length){
+    w.innerHTML='<div class="card empty">아직 일정이 없어요<br><span style="font-size:11.5px">아래 [+ 일정 추가]로 첫 일정을 담아보세요</span></div>';
+    return;
+  }
+  list.forEach(function(it){
+    var c=cat(it.cat);
+    var d=document.createElement('div'); d.className='card it'; d.id='it-'+it.id;
+    d.innerHTML=
+      '<div class="it-top">'+
+        '<div class="it-ic" style="background:'+c.c+'22;">'+c.e+'</div>'+
+        '<div class="it-main">'+
+          '<div class="it-l1"><span class="it-time">'+esc(it.time||'--:--')+'</span>'+
+            '<span class="it-name">'+esc(it.name||'이름 없음')+'</span></div>'+
+          '<div class="it-l2"><span class="bdg" style="background:'+c.c+'1a;color:'+c.c+'">'+esc(it.cat||'기타')+'</span>'+
+            (it.move?'<span class="bdg move">'+(MOVES[it.move]||'')+' '+esc(it.move)+'</span>':'')+
+            (it.alarm?'<span class="bdg alarm">🔔 '+esc(it.alarm)+'</span>':'')+
+            ((it.userDocs&&it.userDocs.length)?'<span class="bdg">📎 '+it.userDocs.length+'</span>':'')+
+          '</div>'+
+          (it.place?'<div class="it-place">📍 '+esc(it.place)+'</div>':'')+
+        '</div>'+
+      '</div>'+
+      (it.memo?'<div class="it-memo">'+esc(it.memo)+'</div>':'')+
+      '<div class="it-btns">'+
+        '<button class="mini" data-a="dir">🧭 길찾기</button>'+
+        '<button class="mini" data-a="map">🗺️ 지도보기</button>'+
+        '<button class="mini gold" data-a="ics">📅 캘린더</button>'+
+        '<button class="mini" data-a="doc">📎 첨부파일</button>'+
+        '<button class="mini" data-a="edit">✏️ 편집</button>'+
+        '<button class="mini warn" data-a="del">삭제</button>'+
+      '</div>';
+    d.addEventListener('click',function(ev){
+      var b=ev.target.closest('[data-a]'); if(!b) return;
+      var a=b.getAttribute('data-a');
+      if(a==='dir') window.open(mapDirUrl(it),'_blank');
+      else if(a==='map') window.open(mapSearchUrl(it),'_blank');
+      else if(a==='ics') downloadIcs([it],(it.name||'일정'));
+      else if(a==='doc') openDocsSheet(it);
+      else if(a==='edit') openItem(it.id);
+      else if(a==='del'){
+        if(delArm[it.id]){ delArm[it.id]=null; removeItem(it.id); }
+        else{ delArm[it.id]=1; b.textContent='한번 더!';
+              setTimeout(function(){ delArm[it.id]=null; if(b) b.textContent='삭제'; },2600); }
+      }
+    });
+    w.appendChild(d);
+  });
+}
+function removeItem(id){
+  var t=trip(); if(!t) return;
+  t.items=(t.items||[]).filter(function(i){return i.id!==id;});
+  save(); renderPlan(); if(page==='over') renderOverview();
+  toast('일정을 삭제했어요');
+}
+function highlightItem(id){
+  page='plan'; syncPage();
+  setTimeout(function(){
+    var el=document.getElementById('it-'+id); if(!el) return;
+    var top=el.getBoundingClientRect().top+window.scrollY-140;
+    window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+    el.classList.add('hl'); setTimeout(function(){el.classList.remove('hl');},1800);
+  },120);
+}
+
+/* ---------- ICS ---------- */
+function icsEsc(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');}
+function dtLocal(day,time){
+  var p=String(day).split('-'), q=String(time||'09:00').split(':');
+  return p[0]+pad(+p[1])+pad(+p[2])+'T'+pad(+q[0]||0)+pad(+q[1]||0)+'00';
+}
+function utcStamp(){
+  var n=new Date();
+  return n.getUTCFullYear()+pad(n.getUTCMonth()+1)+pad(n.getUTCDate())+'T'
+       +pad(n.getUTCHours())+pad(n.getUTCMinutes())+pad(n.getUTCSeconds())+'Z';
+}
+function buildIcs(items){
+  var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Hwang Planner//KO','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  items.forEach(function(it){
+    var st=dtLocal(it.day,it.time||'09:00');
+    var em=t2m(it.time||'09:00')+60;
+    var eh=Math.floor(em/60)%24, emi=em%60;
+    var en=dtLocal(it.day,pad(eh)+':'+pad(emi));
+    L.push('BEGIN:VEVENT');
+    L.push('UID:'+it.id+'@hwang-planner');
+    L.push('DTSTAMP:'+utcStamp());
+    L.push('DTSTART:'+st);
+    L.push('DTEND:'+en);
+    L.push('SUMMARY:'+icsEsc((cat(it.cat).e)+' '+(it.name||'일정')));
+    if(it.place) L.push('LOCATION:'+icsEsc(it.place));
+    var desc=[];
+    if(it.memo) desc.push(it.memo);
+    if(it.move) desc.push('이동: '+it.move);
+    desc.push(mapSearchUrl(it));
+    L.push('DESCRIPTION:'+icsEsc(desc.join('\n')));
+    if(it.alarm){
+      var d=t2m(it.alarm)-t2m(it.time||'09:00');
+      L.push('BEGIN:VALARM');
+      L.push('TRIGGER:'+(d<0?('-PT'+(-d)+'M'):('PT'+d+'M')));
+      L.push('ACTION:DISPLAY');
+      L.push('DESCRIPTION:'+icsEsc((it.name||'일정')+' 알람'));
+      L.push('END:VALARM');
+    }
+    L.push('END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.join('\r\n');
+}
+function dl(text,name,mime){
+  try{
+    var b=new Blob([text],{type:mime||'text/plain;charset=utf-8'});
+    var u=URL.createObjectURL(b), a=document.createElement('a');
+    a.href=u; a.download=name; document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(u); },800);
+  }catch(e){ toast('다운로드에 실패했어요'); }
+}
+function downloadIcs(items,name){
+  if(!items.length){ toast('내보낼 일정이 없어요'); return; }
+  dl(buildIcs(items),String(name).replace(/[\\/:*?"<>|]/g,'_')+'.ics','text/calendar;charset=utf-8');
+  toast('캘린더 파일을 내려받았어요');
+}
+
+/* ---------- 시트 공통 ---------- */
+function openSheet(sel){
+  $('#mask').classList.add('on');
+  var s=$(sel); if(s) s.classList.add('on');
+}
+function closeSheets(){
+  $('#mask').classList.remove('on');
+  $$('.sheet').forEach(function(s){s.classList.remove('on');});
+}
+
+/* ---------- 이미지 리사이즈 ---------- */
+function resizeImage(file,max,cb){
+  var fr=new FileReader();
+  fr.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      try{
+        var w=img.width,h=img.height,r=Math.min(1,max/Math.max(w,h));
+        var cv=document.createElement('canvas');
+        cv.width=Math.round(w*r); cv.height=Math.round(h*r);
+        cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+        cb(cv.toDataURL('image/jpeg',0.72));
+      }catch(e){ cb(fr.result); }
+    };
+    img.onerror=function(){ cb(fr.result); };
+    img.src=fr.result;
+  };
+  fr.onerror=function(){ toast('파일을 읽을 수 없어요'); };
+  fr.readAsDataURL(file);
+}
+function readFileAsData(file,cb){
+  if(/^image\//.test(file.type)) return resizeImage(file,1400,cb);
+  var fr=new FileReader();
+  fr.onload=function(){cb(fr.result);};
+  fr.onerror=function(){toast('파일을 읽을 수 없어요');};
+  fr.readAsDataURL(file);
+}
+
+/* ---------- 좌표 자동 검색 ---------- */
+function geocode(q){
+  if(!q) return Promise.resolve(null);
+  var url='https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q);
+  return fetch(url,{headers:{'Accept':'application/json'}})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(j&&j.length) return {lat:parseFloat(j[0].lat),lng:parseFloat(j[0].lon)};
+      return null;
+    })
+    .catch(function(){return null;});
+}
+
+/* ---------- 일정 시트 ---------- */
+function buildChips(){
+  var c=$('#catChips'); c.innerHTML='';
+  CATK.forEach(function(k){
+    var b=document.createElement('button'); b.className='chip'; b.dataset.k=k;
+    b.innerHTML=CATS[k].e+' '+k;
+    b.onclick=function(){ formCat=k; paintChips(); };
+    c.appendChild(b);
+  });
+  var m=$('#moveChips'); m.innerHTML='';
+  MOVEK.forEach(function(k){
+    var b=document.createElement('button'); b.className='chip'; b.dataset.k=k;
+    b.innerHTML=MOVES[k]+' '+k;
+    b.onclick=function(){ formMove=(formMove===k?'':k); paintChips(); };
+    m.appendChild(b);
+  });
+}
+function paintChips(){
+  $$('#catChips .chip').forEach(function(b){ b.classList.toggle('on',b.dataset.k===formCat); });
+  $$('#moveChips .chip').forEach(function(b){ b.classList.toggle('on',b.dataset.k===formMove); });
+}
+function paintFiles(){
+  var w=$('#fFileList'); w.innerHTML='';
+  formDocs.forEach(function(f,i){
+    var r=document.createElement('div'); r.className='frow';
+    r.innerHTML='<span>'+(/pdf/i.test(f.data.slice(0,30))?'📄':'🖼️')+' '+esc(f.name)+'</span><button>제거</button>';
+    r.querySelector('button').onclick=function(){ formDocs.splice(i,1); paintFiles(); };
+    w.appendChild(r);
+  });
+}
+function openItem(id){
+  var t=trip(); if(!t){ toast('먼저 여행을 만들어 주세요'); return; }
+  editItemId=id||null;
+  var it=null;
+  if(id) (t.items||[]).forEach(function(x){ if(x.id===id) it=x; });
+  $('#shItemTitle').textContent=it?'일정 편집':'일정 추가';
+  $('#itemDel').classList.toggle('hide',!it);
+  formCat=it?(it.cat||'명소'):'명소';
+  formMove=it?(it.move||''):'도보';
+  formDocs=it?((it.userDocs||[]).slice()):[];
+  $('#fDay').value=it?it.day:(curDay||fmtD(today()));
+  $('#fTime').value=it?(it.time||'09:00'):'09:00';
+  $('#fName').value=it?(it.name||''):'';
+  $('#fPlace').value=it?(it.place||''):'';
+  $('#fMap').value=it?(it.mapUrl||''):'';
+  $('#fAlarm').value=it?(it.alarm||''):'';
+  $('#fMemo').value=it?(it.memo||''):'';
+  $('#fGeo').value=(it&&it.lat!=null&&it.lng!=null)?(Number(it.lat).toFixed(4)+', '+Number(it.lng).toFixed(4)):'';
+  var ds=days(t);
+  if(ds.length){ $('#fDay').min=ds[0]; $('#fDay').max=ds[ds.length-1]; }
+  paintChips(); paintFiles();
+  openSheet('#shItem');
+}
+function saveItem(){
+  var t=trip(); if(!t) return;
+  var name=$('#fName').value.trim();
+  if(!name){ toast('일정 이름을 입력해 주세요'); return; }
+  var day=$('#fDay').value||curDay||fmtD(today());
+  var it=null;
+  if(editItemId) (t.items||[]).forEach(function(x){ if(x.id===editItemId) it=x; });
+  var isNew=!it;
+  if(isNew){ it={id:uid(),userDocs:[]}; t.items=t.items||[]; t.items.push(it); }
+  var placeChanged = it.place!==$('#fPlace').value.trim();
+  it.day=day; it.time=$('#fTime').value||'09:00'; it.cat=formCat; it.name=name;
+  it.place=$('#fPlace').value.trim(); it.mapUrl=$('#fMap').value.trim();
+  it.memo=$('#fMemo').value.trim(); it.move=formMove; it.alarm=$('#fAlarm').value||'';
+  it.userDocs=formDocs.slice();
+  if(placeChanged && !isNew){ it.lat=null; it.lng=null; }
+  save();
+  curDay=day; renderDays(); renderPlan(); if(page==='over') renderOverview();
+  closeSheets();
+  toast(isNew?'일정을 추가했어요':'일정을 저장했어요');
+  if(it.lat==null||it.lng==null){
+    var q=it.place||it.name;
+    geocode(q).then(function(g){
+      if(!g) return;
+      it.lat=g.lat; it.lng=g.lng; save(true);
+      if(page==='over') renderOverview();
+      toast('📍 '+name+' 위치를 찾았어요');
+    });
+  }
+}
+
+/* ---------- 첨부파일 시트 ---------- */
+function openDocsSheet(it){
+  var w=$('#docsWrap'); w.innerHTML='';
+  var fs=it.userDocs||[];
+  if(!fs.length){
+    w.innerHTML='<div class="empty">첨부된 파일이 없어요</div>'+
+      '<button class="addbtn" id="docsAdd">＋ 이 일정에 파일 첨부하기</button>';
+    w.querySelector('#docsAdd').onclick=function(){ closeSheets(); setTimeout(function(){ openItem(it.id); },260); };
+    openSheet('#shDocs'); return;
+  }
+  fs.forEach(function(f){
+    var r=document.createElement('div'); r.className='doc';
+    r.innerHTML='<div class="doc-ic">'+(/pdf/i.test(f.data.slice(0,30))?'📄':'🖼️')+'</div>'+
+      '<div class="doc-tx"><div class="doc-n">'+esc(f.name)+'</div><div class="doc-s">'+esc(it.name||'')+'</div></div><div class="doc-go">›</div>';
+    r.onclick=function(){ openDataUrl(f.data,f.name); };
+    w.appendChild(r);
+  });
+  openSheet('#shDocs');
+}
+
+/* ---------- 항공편 시트 ---------- */
+function openFlight(id){
+  var t=trip(); if(!t){ toast('먼저 여행을 만들어 주세요'); return; }
+  editFlightId=id||null;
+  var f=null;
+  if(id) (t.flights||[]).forEach(function(x){ if(x.id===id) f=x; });
+  $('#shFlightTitle').textContent=f?'항공편 편집':'항공편 추가';
+  $('#flDel').classList.toggle('hide',!f);
+  $('#qAir').value=f?(f.air||''):'';
+  $('#qDate').value=f?(f.date||''):(curDay||t.start||'');
+  $('#qC1').value=f?(f.c1||''):''; $('#qN1').value=f?(f.n1||''):''; $('#qT1').value=f?(f.t1||''):'';
+  $('#qC2').value=f?(f.c2||''):''; $('#qN2').value=f?(f.n2||''):''; $('#qT2').value=f?(f.t2||''):'';
+  openSheet('#shFlight');
+}
+function saveFlight(){
+  var t=trip(); if(!t) return;
+  var f=null;
+  if(editFlightId) (t.flights||[]).forEach(function(x){ if(x.id===editFlightId) f=x; });
+  var isNew=!f;
+  if(isNew){ f={id:uid()}; t.flights=t.flights||[]; t.flights.push(f); }
+  f.air=$('#qAir').value.trim(); f.date=$('#qDate').value;
+  f.c1=$('#qC1').value.trim().toUpperCase(); f.n1=$('#qN1').value.trim(); f.t1=$('#qT1').value;
+  f.c2=$('#qC2').value.trim().toUpperCase(); f.n2=$('#qN2').value.trim(); f.t2=$('#qT2').value;
+  save(); renderFlights(); closeSheets(); toast(isNew?'항공편을 추가했어요':'항공편을 저장했어요');
+}
+
+/* ---------- 여행 시트 ---------- */
+function openTrip(id){
+  editTripId=id||null;
+  var t=null;
+  if(id) DB.trips.forEach(function(x){ if(x.id===id) t=x; });
+  $('#shTripTitle').textContent=t?'여행 편집':'새 여행 만들기';
+  $('#tripDel').classList.toggle('hide',!t||DB.trips.length<=1);
+  var s=fmtD(addDays(today(),14));
+  $('#tTitle').value=t?(t.title||''):'';
+  $('#tStart').value=t?(t.start||''):s;
+  $('#tEnd').value=t?(t.end||''):fmtD(addDays(today(),16));
+  $('#tNote').value=t?(t.note||''):'';
+  $('#tCities').value=t?((t.cities||[]).join(', ')):'';
+  openSheet('#shTrip');
+}
+function saveTrip(){
+  var title=$('#tTitle').value.trim();
+  if(!title){ toast('여행 제목을 입력해 주세요'); return; }
+  var st=$('#tStart').value, en=$('#tEnd').value;
+  if(!st||!en){ toast('시작일과 종료일을 입력해 주세요'); return; }
+  if(parseD(en)<parseD(st)){ toast('종료일이 시작일보다 빠를 수 없어요'); return; }
+  var t=null;
+  if(editTripId) DB.trips.forEach(function(x){ if(x.id===editTripId) t=x; });
+  var isNew=!t;
+  if(isNew){ t={id:uid(),flights:[],items:[],bg:''}; DB.trips.push(t); DB.activeId=t.id; curDay=null; }
+  t.title=title; t.start=st; t.end=en; t.note=$('#tNote').value.trim();
+  t.cities=$('#tCities').value.split(',').map(function(s){return s.trim();}).filter(Boolean);
+  save(); closeSheets(); renderAll();
+  toast(isNew?'새 여행을 만들었어요':'여행 정보를 저장했어요');
+}
+function deleteTrip(id){
+  if(DB.trips.length<=1){ toast('여행은 최소 1개가 필요해요'); return; }
+  DB.trips=DB.trips.filter(function(t){return t.id!==id;});
+  if(DB.activeId===id){ DB.activeId=DB.trips[0].id; curDay=null; }
+  save(); renderAll(); toast('여행을 삭제했어요');
+}
+function renderTripList(){
+  var w=$('#tripsWrap'); w.innerHTML='';
+  if(!DB.trips.length){ w.innerHTML='<div class="empty">여행이 없어요</div>'; return; }
+  DB.trips.forEach(function(t){
+    var d=document.createElement('div'); d.className='trow'+(t.id===DB.activeId?' on':'');
+    var s=parseD(t.start), e=parseD(t.end);
+    var period=(s&&e)?((s.getMonth()+1)+'.'+s.getDate()+' – '+(e.getMonth()+1)+'.'+e.getDate()+' · '+Math.max(0,diffDays(s,e))+'박'):'기간 미설정';
+    d.innerHTML='<div class="trow-m"><div class="trow-t">'+esc(t.title||'제목 없음')+'</div>'+
+      '<div class="trow-s">'+esc(period)+' · 일정 '+((t.items||[]).length)+'개</div></div>'+
+      (t.id===DB.activeId?'<div class="trow-c">✓</div>':'')+
+      '<button class="mini" data-e="1">편집</button>'+
+      (DB.trips.length>1?'<button class="mini warn" data-d="1">삭제</button>':'');
+    d.addEventListener('click',function(ev){
+      if(ev.target.getAttribute('data-e')){ closeSheets(); setTimeout(function(){openTrip(t.id);},260); return; }
+      if(ev.target.getAttribute('data-d')){
+        if(delArm['t'+t.id]){ delArm['t'+t.id]=null; deleteTrip(t.id); closeSheets(); }
+        else{ delArm['t'+t.id]=1; ev.target.textContent='한번 더!';
+              setTimeout(function(){ delArm['t'+t.id]=null; try{ev.target.textContent='삭제';}catch(e){} },2600); }
+        return;
+      }
+      DB.activeId=t.id; curDay=null; save(); renderAll(); closeSheets(); toast('『'+(t.title||'')+'』로 전환했어요');
+    });
+    w.appendChild(d);
+  });
+}
+
+/* ---------- 설정 ---------- */
+function openSettings(){
+  var t=trip();
+  $('#sTitle').value=t?(t.title||''):'';
+  var p=(typeof Notification!=='undefined')?Notification.permission:'unsupported';
+  $('#sPermTx').textContent = p==='granted'?'알림이 허용되어 있어요':(p==='denied'?'알림이 차단되어 있어요':'브라우저 알림 허용');
+  openSheet('#shSet');
+}
+function exportJson(){
+  dl(JSON.stringify(DB,null,2),'hwang-planner-'+fmtD(new Date())+'.json','application/json');
+  toast('백업 파일을 내려받았어요');
+}
+function importJson(file){
+  var fr=new FileReader();
+  fr.onload=function(){
+    try{
+      var o=JSON.parse(fr.result);
+      if(!o||!o.trips||!o.trips.length) throw 0;
+      DB=o; if(!DB.activeId) DB.activeId=DB.trips[0].id;
+      curDay=null; save(); renderAll(); closeSheets(); toast('데이터를 불러왔어요');
+    }catch(e){ toast('올바른 백업 파일이 아니에요'); }
+  };
+  fr.readAsText(file);
+}
+
+/* ---------- 배경 사진 ---------- */
+function pickBg(){ $('#bgFile').click(); }
+
+/* ================= 오버뷰 (지도) ================= */
+var map=null, layLine=null, layPin=null, chrM=null, ovIdx=0, ovItems=[], segs=[], animRaf=null, walkT=null;
+
+var SP={};
+SP.walk1='<svg viewBox="0 0 24 24" width="38" height="38" shape-rendering="crispEdges"><rect x="8" y="1" width="8" height="3" fill="#22303f"/><rect x="9" y="4" width="6" height="4" fill="#f6cda6"/><rect x="8" y="8" width="8" height="7" fill="#d9724a"/><rect x="6" y="9" width="2" height="5" fill="#f6cda6"/><rect x="16" y="9" width="2" height="5" fill="#f6cda6"/><rect x="9" y="15" width="2.5" height="6" fill="#1b4b7a"/><rect x="12.5" y="15" width="2.5" height="6" fill="#1b4b7a"/><rect x="8" y="21" width="4" height="2" fill="#22303f"/><rect x="12" y="21" width="4" height="2" fill="#22303f"/></svg>';
+SP.walk2='<svg viewBox="0 0 24 24" width="38" height="38" shape-rendering="crispEdges"><rect x="8" y="1" width="8" height="3" fill="#22303f"/><rect x="9" y="4" width="6" height="4" fill="#f6cda6"/><rect x="8" y="8" width="8" height="7" fill="#d9724a"/><rect x="5" y="8" width="2" height="5" fill="#f6cda6"/><rect x="17" y="10" width="2" height="5" fill="#f6cda6"/><rect x="6" y="15" width="2.5" height="6" fill="#1b4b7a" transform="rotate(-18 7 16)"/><rect x="14" y="15" width="2.5" height="6" fill="#1b4b7a" transform="rotate(16 15 16)"/><rect x="4" y="20" width="4" height="2" fill="#22303f"/><rect x="15" y="20" width="4" height="2" fill="#22303f"/></svg>';
+SP.car='<svg viewBox="0 0 24 24" width="38" height="38" shape-rendering="crispEdges"><rect x="10" y="4" width="4" height="2" fill="#1b4b7a"/><rect x="6" y="7" width="12" height="5" fill="#e0a94e"/><rect x="7" y="8" width="4" height="3" fill="#cfe6f5"/><rect x="13" y="8" width="4" height="3" fill="#cfe6f5"/><rect x="3" y="12" width="18" height="6" fill="#e0a94e"/><rect x="3" y="14" width="18" height="2" fill="#22303f"/><rect x="4" y="18" width="5" height="3" rx="1" fill="#22303f"/><rect x="15" y="18" width="5" height="3" rx="1" fill="#22303f"/></svg>';
+SP.train='<svg viewBox="0 0 24 24" width="38" height="38" shape-rendering="crispEdges"><rect x="4" y="3" width="16" height="15" rx="4" fill="#3f7cb0"/><rect x="6" y="6" width="12" height="5" fill="#cfe6f5"/><rect x="6" y="13" width="4" height="3" fill="#e0a94e"/><rect x="14" y="13" width="4" height="3" fill="#e0a94e"/><rect x="5" y="18" width="4" height="3" rx="1" fill="#22303f"/><rect x="15" y="18" width="4" height="3" rx="1" fill="#22303f"/><rect x="11" y="1" width="2" height="2" fill="#6b7a89"/></svg>';
+SP.tram='<svg viewBox="0 0 24 24" width="38" height="38" shape-rendering="crispEdges"><rect x="11" y="0" width="2" height="4" fill="#6b7a89"/><rect x="4" y="4" width="16" height="14" rx="3" fill="#2f8f6f"/><rect x="6" y="7" width="12" height="5" fill="#e7f5ee"/><rect x="6" y="14" width="12" height="2" fill="#e0a94e"/><rect x="5" y="18" width="4" height="3" rx="1" fill="#22303f"/><rect x="15" y="18" width="4" height="3" rx="1" fill="#22303f"/></svg>';
+SP.bike='<svg viewBox="0 0 24 24" width="38" height="38"><circle cx="6" cy="17" r="4.5" fill="none" stroke="#22303f" stroke-width="2"/><circle cx="18" cy="17" r="4.5" fill="none" stroke="#22303f" stroke-width="2"/><path d="M6 17L11 9h5l2 8" fill="none" stroke="#d9724a" stroke-width="2" stroke-linejoin="round"/><circle cx="15" cy="5" r="2.5" fill="#f6cda6"/></svg>';
+SP.plane='<svg viewBox="0 0 24 24" width="38" height="38"><path d="M2 13l20-6-6 15-3-6-6-1z" fill="#3f7cb0" stroke="#1b4b7a" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+function spriteFor(move){
+  if(move==='도보') return 'walk';
+  if(move==='택시'||move==='버스') return 'car';
+  if(move==='기차'||move==='지하철') return 'train';
+  if(move==='트램') return 'tram';
+  if(move==='자전거') return 'bike';
+  if(move==='항공') return 'plane';
+  return 'walk';
+}
+function ensureMap(){
+  if(map) return map;
+  if(typeof L==='undefined') return null;
+  map=L.map('map',{zoomControl:true,attributionControl:true}).setView([35.681,139.767],13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+  layLine=L.layerGroup().addTo(map);
+  layPin=L.layerGroup().addTo(map);
+  map.on('moveend zoomend',layoutLabels);
+  return map;
+}
+function layoutLabels(){
+  if(!map||!layPin) return;
+  var w=map.getSize().x;
+  layPin.eachLayer(function(mk){
+    try{
+      var el=mk.getElement(); if(!el) return;
+      var pin=el.querySelector('.pin'); if(!pin) return;
+      var p=map.latLngToContainerPoint(mk.getLatLng());
+      pin.classList.toggle('lft', p.x > w*0.52);
+    }catch(e){}
+  });
+}
+function hav(a,b){
+  var R=6371000, r=Math.PI/180;
+  var dLat=(b[0]-a[0])*r, dLng=(b[1]-a[1])*r;
+  var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+var routeCache={};
+function getRoute(a,b){
+  var k=a[0].toFixed(4)+','+a[1].toFixed(4)+'>'+b[0].toFixed(4)+','+b[1].toFixed(4);
+  if(routeCache[k]) return Promise.resolve(routeCache[k]);
+  var url='https://router.project-osrm.org/route/v1/driving/'+a[1]+','+a[0]+';'+b[1]+','+b[0]+'?overview=full&geometries=geojson';
+  return fetch(url).then(function(r){return r.json();}).then(function(j){
+    var c=j&&j.routes&&j.routes[0]&&j.routes[0].geometry&&j.routes[0].geometry.coordinates;
+    var p=(c&&c.length>1)?c.map(function(x){return [x[1],x[0]];}):[a,b];
+    routeCache[k]=p; return p;
+  }).catch(function(){ routeCache[k]=[a,b]; return [a,b]; });
+}
+function stopAnim(){
+  if(animRaf){ cancelAnimationFrame(animRaf); animRaf=null; }
+  if(walkT){ clearInterval(walkT); walkT=null; }
+}
+function chrHtml(kind,frame){
+  var svg = kind==='walk' ? (frame? SP.walk2:SP.walk1) : (SP[kind]||SP.walk1);
+  return '<div class="chr"><div class="chr-in">'+svg+'</div></div>';
+}
+function setChar(pos,kind){
+  if(!map) return;
+  var icon=L.divIcon({className:'',html:chrHtml(kind,0),iconSize:[0,0]});
+  if(!chrM){ chrM=L.marker(pos,{icon:icon,interactive:false,zIndexOffset:1000}).addTo(map); }
+  else { chrM.setLatLng(pos); chrM.setIcon(icon); }
+  if(kind==='walk'){
+    var f=0;
+    if(walkT) clearInterval(walkT);
+    walkT=setInterval(function(){
+      f=1-f;
+      try{ chrM.setIcon(L.divIcon({className:'',html:chrHtml('walk',f),iconSize:[0,0]})); }catch(e){}
+    },220);
+  } else if(walkT){ clearInterval(walkT); walkT=null; }
+}
+function ptAt(path,frac){
+  if(path.length<2) return path[0];
+  var tot=0,i,segl=[];
+  for(i=0;i<path.length-1;i++){ var d=hav(path[i],path[i+1]); segl.push(d); tot+=d; }
+  if(tot<=0) return path[0];
+  var want=tot*frac, acc=0;
+  for(i=0;i<segl.length;i++){
+    if(acc+segl[i]>=want){
+      var r=segl[i]?(want-acc)/segl[i]:0;
+      return [path[i][0]+(path[i+1][0]-path[i][0])*r, path[i][1]+(path[i+1][1]-path[i][1])*r];
+    }
+    acc+=segl[i];
+  }
+  return path[path.length-1];
+}
+function pathDist(p){ var t=0; for(var i=0;i<p.length-1;i++) t+=hav(p[i],p[i+1]); return t; }
+function animateAlong(path,kind,done){
+  stopAnim();
+  if(!path||path.length<2){ if(path&&path[0]) setChar(path[0],kind); if(done) done(); return; }
+  var km=pathDist(path)/1000;
+  var dur=Math.max(1600,Math.min(4000,1600+km*450));
+  var t0=performance.now();
+  setChar(path[0],kind);
+  function step(now){
+    var p=Math.min(1,(now-t0)/dur);
+    var e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+    var pos=ptAt(path,e);
+    if(chrM) chrM.setLatLng(pos);
+    try{
+      if(map && !map.getBounds().pad(-0.18).contains(L.latLng(pos[0],pos[1])))
+        map.panTo(pos,{animate:true,duration:0.6});
+    }catch(e2){}
+    if(p<1) animRaf=requestAnimationFrame(step);
+    else { animRaf=null; if(done) done(); }
+  }
+  animRaf=requestAnimationFrame(step);
+}
+function drawLines(){
+  if(!layLine) return;
+  layLine.clearLayers();
+  segs.forEach(function(p,i){
+    if(!p||p.length<2) return;
+    var done=(i<ovIdx);
+    L.polyline(p,done
+      ? {color:'#1b4b7a',weight:5,opacity:.92,lineCap:'round'}
+      : {color:'#aab6c2',weight:4,opacity:.9,dashArray:'2 9',lineCap:'round'}).addTo(layLine);
+  });
+}
+function renderOverview(){
+  var m=ensureMap();
+  var panelNone=function(msg){
+    $('#ovNum').textContent='0/0'; $('#ovBar').style.width='0%';
+    $('#ovName').textContent=msg; $('#ovSub').textContent=curDay?korDate(curDay):'';
+    $('#ovIc').textContent='📍'; $('#ovIc').style.background='#eef3f8';
+  };
+  if(!m){ panelNone('지도를 불러오지 못했어요'); return; }
+  stopAnim();
+  layPin.clearLayers(); layLine.clearLayers();
+  if(chrM){ map.removeLayer(chrM); chrM=null; }
+  var all=itemsOf(curDay);
+  ovItems=all.filter(function(i){return i.lat!=null&&i.lng!=null&&!isNaN(i.lat)&&!isNaN(i.lng);});
+  segs=[];
+  if(!ovItems.length){
+    panelNone(all.length?'좌표가 있는 일정이 없어요':'아직 일정이 없어요');
+    if(all.length) toast('일정을 편집해 지도 검색어를 넣어보세요');
+    return;
+  }
+  if(ovIdx>=ovItems.length) ovIdx=0;
+  var pts=[];
+  ovItems.forEach(function(it,i){
+    var c=cat(it.cat), pos=[+it.lat,+it.lng]; pts.push(pos);
+    var html='<div class="pin'+(i<ovIdx?' done':'')+'">'+
+      '<div class="pin-b" style="background:'+c.c+'">'+(i+1)+'</div>'+
+      '<div class="pin-l"><small>'+esc(it.time||'')+'</small> '+esc((it.name||'').slice(0,14))+'</div></div>';
+    var mk=L.marker(pos,{icon:L.divIcon({className:'',html:html,iconSize:[0,0]}),zIndexOffset:100+i});
+    mk.on('click',function(){ highlightItem(it.id); });
+    mk.addTo(layPin);
+  });
+  try{ map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[40,50],paddingBottomRight:[40,40],maxZoom:15}); }catch(e){}
+  setTimeout(function(){ try{ map.invalidateSize(); layoutLabels(); }catch(e){} },80);
+  layoutLabels();
+  setChar(pts[ovIdx],spriteFor(ovItems[ovIdx].move));
+  updateOvPanel();
+  // 경로(도로) 로딩
+  var chain=Promise.resolve();
+  ovItems.slice(0,-1).forEach(function(it,i){
+    chain=chain.then(function(){
+      return getRoute([+ovItems[i].lat,+ovItems[i].lng],[+ovItems[i+1].lat,+ovItems[i+1].lng])
+        .then(function(p){ segs[i]=p; drawLines(); });
+    });
+  });
+}
+function updateOvPanel(){
+  var n=ovItems.length;
+  if(!n) return;
+  var it=ovItems[ovIdx], c=cat(it.cat);
+  $('#ovNum').textContent=(ovIdx+1)+'/'+n;
+  $('#ovBar').style.width=Math.round((ovIdx+1)/n*100)+'%';
+  $('#ovIc').textContent=c.e; $('#ovIc').style.background=c.c+'22';
+  $('#ovName').textContent=it.name||'';
+  $('#ovSub').textContent=(it.time||'')+' · '+(it.cat||'')+(it.place?(' · '+it.place):'');
+  $$('#map .pin').forEach(function(p,i){ p.classList.toggle('done',i<ovIdx); });
+}
+function goOv(idx){
+  if(!ovItems.length) return;
+  idx=Math.max(0,Math.min(ovItems.length-1,idx));
+  if(idx===ovIdx){ updateOvPanel(); return; }
+  var from=ovIdx, kind;
+  if(idx===from+1 && segs[from] && segs[from].length>1){
+    kind=spriteFor(ovItems[idx].move);
+    ovIdx=idx; drawLines(); updateOvPanel();
+    animateAlong(segs[from],kind);
+  } else if(idx===from-1 && segs[idx] && segs[idx].length>1){
+    kind=spriteFor(ovItems[from].move);
+    ovIdx=idx; drawLines(); updateOvPanel();
+    animateAlong(segs[idx].slice().reverse(),kind);
+  } else {
+    ovIdx=idx; drawLines(); updateOvPanel();
+    stopAnim(); setChar([+ovItems[idx].lat,+ovItems[idx].lng],spriteFor(ovItems[idx].move));
+    try{ map.panTo([+ovItems[idx].lat,+ovItems[idx].lng]); }catch(e){}
+  }
+}
+function ovNowJump(){
+  var t=trip(); if(!t) return;
+  var ds=days(t), td=fmtD(today());
+  if(ds.indexOf(td)>=0 && curDay!==td){ curDay=td; renderDays(); renderPlan(); renderOverview(); }
+  if(!ovItems.length){ toast('오늘 표시할 일정이 없어요'); return; }
+  var n=nowMin(), idx=0;
+  for(var i=0;i<ovItems.length;i++) if(t2m(ovItems[i].time)<=n) idx=i;
+  goOv(idx);
+  toast('현재 시각 기준 위치예요');
+}
+
+/* ================= 알람 ================= */
+var fired={};
+function beep(){
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    var ac=new AC(), o=ac.createOscillator(), g=ac.createGain();
+    o.type='sine'; o.frequency.value=880; o.connect(g); g.connect(ac.destination);
+    g.gain.setValueAtTime(0.0001,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25,ac.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+0.45);
+    o.start(); o.stop(ac.currentTime+0.5);
+    setTimeout(function(){ try{ac.close();}catch(e){} },900);
+  }catch(e){}
+}
+function showAlarm(it){
+  $('#alarmName').textContent=it.name||'일정';
+  $('#alarmSub').textContent=(it.time||'')+' · '+(it.place||it.cat||'');
+  $('#alarmBox').classList.add('on');
+  beep();
+  try{
+    if(typeof Notification!=='undefined' && Notification.permission==='granted')
+      new Notification('🔔 '+(it.name||'일정'),{body:(it.time||'')+' '+(it.place||''),tag:it.id});
+  }catch(e){}
+  setTimeout(function(){ $('#alarmBox').classList.remove('on'); },20000);
+}
+function checkAlarms(){
+  var t=trip(); if(!t) return;
+  var td=fmtD(today()), n=nowMin();
+  (t.items||[]).forEach(function(it){
+    if(!it.alarm||it.day!==td) return;
+    var k=it.id+'@'+td+'@'+it.alarm;
+    if(fired[k]) return;
+    var a=t2m(it.alarm);
+    if(n>=a && n-a<=3){ fired[k]=1; showAlarm(it); }
+  });
+}
+
+/* ================= PWA ================= */
+function installManifest(){
+  try{
+    var ico=function(sz){
+      return 'data:image/svg+xml,'+encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+sz+' '+sz+'" width="'+sz+'" height="'+sz+'">'+
+        '<rect width="'+sz+'" height="'+sz+'" rx="'+(sz*0.22)+'" fill="#1b4b7a"/>'+
+        '<circle cx="'+(sz/2)+'" cy="'+(sz*0.43)+'" r="'+(sz*0.17)+'" fill="none" stroke="#e0a94e" stroke-width="'+(sz*0.05)+'"/>'+
+        '<path d="M'+(sz/2)+' '+(sz*0.60)+' L'+(sz/2)+' '+(sz*0.81)+'" stroke="#e0a94e" stroke-width="'+(sz*0.05)+'" stroke-linecap="round"/>'+
+        '<circle cx="'+(sz/2)+'" cy="'+(sz*0.43)+'" r="'+(sz*0.062)+'" fill="#d9724a"/></svg>');
+    };
+    var mf={
+      name:"퐝's Planner", short_name:"퐝Planner",
+      description:"오프라인으로 쓰는 여행 일정 플래너",
+      start_url:".", scope:".", display:"standalone", orientation:"portrait",
+      background_color:"#f6f8fa", theme_color:"#1b4b7a", lang:"ko",
+      icons:[{src:ico(192),sizes:"192x192",type:"image/svg+xml",purpose:"any"},
+             {src:ico(512),sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]
+    };
+    var l=document.createElement('link');
+    l.rel='manifest';
+    l.href='data:application/manifest+json;charset=utf-8,'+encodeURIComponent(JSON.stringify(mf));
+    document.head.appendChild(l);
+  }catch(e){}
+}
+
+/* ================= 페이지 전환 / 전체 렌더 ================= */
+function syncPage(){
+  $$('.ptab').forEach(function(b){ b.classList.toggle('on',b.dataset.page===page); });
+  $('#pagePlan').classList.toggle('hide',page!=='plan');
+  $('#pageOver').classList.toggle('hide',page!=='over');
+  if(page==='over'){
+    renderOverview();
+    setTimeout(function(){ if(map) try{map.invalidateSize();}catch(e){} },120);
+  } else stopAnim();
+}
+function renderAll(){ renderHeader(); renderDays(); renderPlan(); syncPage(); }
+
+/* ================= 초기화 ================= */
+function bind(){
+  $('#mask').onclick=closeSheets;
+  $$('[data-close]').forEach(function(b){ b.onclick=closeSheets; });
+  $$('.ptab').forEach(function(b){ b.onclick=function(){ page=b.dataset.page; syncPage(); }; });
+
+  $('#btnHelp').onclick=function(){ openSheet('#shHelp'); };
+  $('#btnTrips').onclick=function(){ renderTripList(); openSheet('#shTrips'); };
+  $('#btnNewTrip').onclick=function(){ openTrip(null); };
+  $('#tripsNew').onclick=function(){ closeSheets(); setTimeout(function(){openTrip(null);},260); };
+  $('#btnAddItem').onclick=function(){ openItem(null); };
+  $('#btnAddFlight').onclick=function(){ openFlight(null); };
+  $('#btnSettings').onclick=openSettings;
+  $('#btnCam').onclick=pickBg;
+
+  $('#itemSave').onclick=saveItem;
+  $('#itemDel').onclick=function(){
+    if(!editItemId) return;
+    if(delArm.sheet){ delArm.sheet=null; removeItem(editItemId); closeSheets(); }
+    else{ delArm.sheet=1; $('#itemDel').textContent='한번 더!';
+          setTimeout(function(){ delArm.sheet=null; $('#itemDel').textContent='삭제'; },2600); }
+  };
+  $('#flSave').onclick=saveFlight;
+  $('#flDel').onclick=function(){
+    var t=trip(); if(!t||!editFlightId) return;
+    if(delArm.fl){ delArm.fl=null;
+      t.flights=(t.flights||[]).filter(function(f){return f.id!==editFlightId;});
+      save(); renderFlights(); closeSheets(); toast('항공편을 삭제했어요');
+    } else { delArm.fl=1; $('#flDel').textContent='한번 더!';
+      setTimeout(function(){ delArm.fl=null; $('#flDel').textContent='삭제'; },2600); }
+  };
+  $('#tripSave').onclick=saveTrip;
+  $('#tripDel').onclick=function(){
+    if(!editTripId) return;
+    if(delArm.tr){ delArm.tr=null; deleteTrip(editTripId); closeSheets(); }
+    else{ delArm.tr=1; $('#tripDel').textContent='한번 더!';
+          setTimeout(function(){ delArm.tr=null; $('#tripDel').textContent='삭제'; },2600); }
+  };
+
+  $('#fFile').onchange=function(e){
+    var fs=Array.prototype.slice.call(e.target.files||[]);
+    if(!fs.length) return;
+    var left=fs.length;
+    fs.forEach(function(f){
+      if(f.size>6*1024*1024 && !/^image\//.test(f.type)){ toast('6MB 이하 파일만 첨부할 수 있어요'); left--; return; }
+      readFileAsData(f,function(d){ formDocs.push({name:f.name,data:d}); paintFiles(); left--; });
+    });
+    e.target.value='';
+  };
+  $('#bgFile').onchange=function(e){
+    var f=(e.target.files||[])[0]; if(!f) return;
+    resizeImage(f,1400,function(d){
+      var t=trip(); if(!t) return;
+      t.bg=d; if(save()) toast('배경 사진을 바꿨어요');
+      renderHeader();
+    });
+    e.target.value='';
+  };
+
+  $('#setSave').onclick=function(){
+    var t=trip(); if(t){ var v=$('#sTitle').value.trim(); if(v) t.title=v; save(); }
+    closeSheets(); renderAll(); toast('설정을 저장했어요');
+  };
+  $('#sBg').onclick=pickBg;
+  $('#sPerm').onclick=function(){
+    if(typeof Notification==='undefined'){ toast('이 브라우저는 알림을 지원하지 않아요'); return; }
+    Notification.requestPermission().then(function(p){
+      $('#sPermTx').textContent = p==='granted'?'알림이 허용되어 있어요':(p==='denied'?'알림이 차단되어 있어요':'브라우저 알림 허용');
+      toast(p==='granted'?'알림을 허용했어요':'알림 권한이 없어요');
+    });
+  };
+  $('#sExp').onclick=exportJson;
+  $('#sImp').onclick=function(){ $('#sImpFile').click(); };
+  $('#sImpFile').onchange=function(e){ var f=(e.target.files||[])[0]; if(f) importJson(f); e.target.value=''; };
+  $('#sIcs').onclick=function(){
+    var t=trip(); if(!t) return;
+    downloadIcs((t.items||[]).slice().sort(function(a,b){return a.day===b.day?t2m(a.time)-t2m(b.time):(a.day<b.day?-1:1);}), t.title||'여행일정');
+  };
+  $('#sReset').onclick=function(){
+    if(delArm.reset){
+      delArm.reset=null;
+      DB={trips:[seed()],activeId:null}; DB.activeId=DB.trips[0].id; curDay=null;
+      save(); renderAll(); closeSheets(); toast('초기화했어요');
+    } else {
+      delArm.reset=1; $('#sReset').textContent='한번 더 누르기';
+      setTimeout(function(){ delArm.reset=null; $('#sReset').textContent='초기화'; },2800);
+    }
+  };
+
+  $('#ovPrev').onclick=function(){ goOv(ovIdx-1); };
+  $('#ovNext').onclick=function(){ goOv(ovIdx+1); };
+  $('#ovNow').onclick=ovNowJump;
+  $('#alarmX').onclick=function(){ $('#alarmBox').classList.remove('on'); };
+}
+
+function init(){
+  installManifest();
+  var d=lsGet();
+  if(d && d.trips && d.trips.length){
+    DB=d;
+    DB.trips.forEach(function(t){
+      t.items=t.items||[]; t.flights=t.flights||[]; t.cities=t.cities||[];
+      t.items.forEach(function(i){ i.userDocs=i.userDocs||[]; });
+    });
+    if(!DB.activeId || !trip()) DB.activeId=DB.trips[0].id;
+  } else {
+    DB={trips:[seed()],activeId:null}; DB.activeId=DB.trips[0].id; save(true);
+  }
+  buildChips(); bind(); renderAll();
+  if(!lsOK) toast('저장소를 쓸 수 없어 이번 세션에만 저장돼요');
+  setInterval(checkAlarms,15000);
+  setTimeout(checkAlarms,1500);
+  window.addEventListener('resize',function(){ if(map&&page==='over') try{map.invalidateSize();}catch(e){} });
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+else init();
+
+})();
+
+</script>
+</body>
+</html>
